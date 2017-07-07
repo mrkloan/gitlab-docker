@@ -24,16 +24,16 @@ $ sudo chmod +x /usr/local/bin/docker-compose
 
 ## Gitlab setup
 
-Create the following directory structure next to the `docker-compose.yml` file:
+The repository structure is as follows:
 
 ```txt
- - docker-compose.yml
- - gitlab-ce
-   \___ config
-    |__ data
-    |__ logs
- - gitlab-runner
- - README.md
+docker-compose.yml
+gitlab-ce/
+├── config/
+├── data/
+└── logs/
+gitlab-runner/
+README.md
 ```
 
 Run the containers and check that they are effectively running using:
@@ -73,6 +73,24 @@ $ docker exec -it gitlab-ce gitlab-ctl restart
 ```ruby
 # gitlab-ce/config/gitlab.rb
 mattermost_external_url 'http://<MATTERMOST_FQDN>/' 
+
+# GitLab as the only external authentication source
+mattermost['email_enable_sign_up_with_email'] = false
+mattermost['email_enable_sign_in_with_email'] = false
+
+# Configure an e-mail address for Mattermost
+mattermost['email_send_email_notifications'] = true
+mattermost['email_smtp_username'] = "<SMTP_USERNAME>"
+mattermost['email_smtp_password'] = "<SMTP_PASSWORD>"
+mattermost['email_smtp_server'] = "<SMTP_FQDN>"
+mattermost['email_smtp_port'] = "<SMTP_PORT>" # 587
+mattermost['email_connection_security'] = 'TLS' # 'TLS', 'STARTTLS' or nil
+mattermost['email_feedback_name'] = "GitLab Mattermost"
+mattermost['email_feedback_email'] = "<EMAIL_ADDRESS>"
+
+# E-mail batching allowing users to control how often they receive notifications
+mattermost['service_site_url'] = 'http://<MATTERMOST_FQDN>:80' # With protocol AND port
+mattermost['email_enable_batching'] = true
 ```
 
 *TODO*: e-mail configuration
