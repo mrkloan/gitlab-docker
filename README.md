@@ -43,7 +43,7 @@ $ docker-compose up -d
 $ docker ps # 3 containers should be running: gitlab-ce, gitlab-runner, gitlab-registry
 ```
 
-If you're hit by an error `500` or `502` when trying to access the application, try reload the page or updating the shared directories permissions:
+If you're hit by an error `500` or `502` when trying to access the application, try reloading the page or updating the shared directories permissions:
 
 ```bash
 $ docker exec -it gitlab-ce update-permissions
@@ -57,7 +57,15 @@ Define a DNS name for this GitLab instance by editing `gitlab-ce/config/gitlab.r
 
 ```ruby
 # gitlab-ce/config/gitlab.rb
-external_url 'http://<GITLAB_FQDN>/'
+external_url 'http://<GITLAB_FQDN>'
+```
+
+If you want to enable HTTPS on your instance, place your `.key` and `.cert` files into a `gitlab-ce/config/ssl` folder. If your external url is `gitlab.example.com`, then your files must be named `gitlab.example.com.key` and `gitlab.example.com.cert`:
+
+```ruby
+# gitlab-ce/config/gitlab.rb
+external_url 'https://<GITLAB_FQDN>' # HTTPS
+nginx['redirect_http_to_https'] = true
 ```
 
 Once you're done editing the file, reconfigure gitlab and reload the server. Your GitLab server should now be accessible through the external URL you configured, given that the DNS redirects to your Docker host.
@@ -72,7 +80,7 @@ $ docker exec -it gitlab-ce gitlab-ctl restart
 
 ```ruby
 # gitlab-ce/config/gitlab.rb
-mattermost_external_url 'http://<MATTERMOST_FQDN>/' 
+mattermost_external_url 'http://<MATTERMOST_FQDN>' 
 
 # GitLab as the only external authentication source
 mattermost['email_enable_sign_up_with_email'] = false
@@ -91,6 +99,18 @@ mattermost['email_feedback_email'] = "<EMAIL_ADDRESS>"
 # E-mail batching allowing users to control how often they receive notifications
 mattermost['service_site_url'] = 'http://<MATTERMOST_FQDN>:80' # With protocol AND port
 mattermost['email_enable_batching'] = true
+```
+
+If you want to enable HTTPS on your Mattermost instance:
+
+```ruby
+# gitlab-ce/config/gitlab.rb
+mattermost_external_url 'https://<MATTERMOST_FQDN' # HTTPS
+
+mattermost_nginx['redirect_http_to_https'] = true
+mattermost_nginx['ssl_certificate'] = "/etc/gitlab/ssl/<SSL_CERTIFICATE>.crt"
+mattermost_nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/<SSL_KEY>.key"
+mattermost['service_use_ssl'] = true
 ```
 
 *TODO*: e-mail configuration
@@ -129,5 +149,6 @@ Reload the `Runners` administration page on your GitLab server; the newly create
 Please note that the jobs using this runner will be running in *containers*, which will not be linked to the other 3 containers. Which means that the CI containers will try to resolve your GitLab instance FQDN using a DNS server (such as 8.8.8.8, or the one of your entreprise private network): your `/etc/hosts` file will not be used in this case! Be sure that your GitLab instance is reachable outside of your local-machine networks (localhost, VM, container, ...) if you want this runner to successfully build your projects.
 
 ### Registry
+> https://docs.gitlab.com/ce/user/project/container_registry.html
 
 *TODO*
