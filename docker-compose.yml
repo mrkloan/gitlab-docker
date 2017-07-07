@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  gitlab-ce:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab-ce
+    ports:
+      - "80:80"
+      - "443:443"
+      - "22:22"
+    volumes:
+      - ./gitlab-ce/config:/etc/gitlab:Z
+      - ./gitlab-ce/logs:/var/log/gitlab:Z
+      - ./gitlab-ce/data:/var/opt/gitlab:Z
+    links:
+      - gitlab-runner
+    restart: on-failure:3
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./gitlab-runner:/etc/gitlab-runner
+    restart: on-failure:3
