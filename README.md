@@ -72,6 +72,30 @@ nginx['ssl_certificate'] = "/etc/gitlab/ssl/<SSL_CERTIFICATE>.crt"
 nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/<SSL_CERTIFICATE>.key"
 ```
 
+Configure SMTP and e-mail notifications:
+
+```ruby
+# gitlab-ce/config/gitlab.rb
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = '<SMTP_ADDRESS>' # Ex.: smtp        |
+gitlab_rails['smtp_domain'] = '<SMTP_DOMAIN>'   # Ex.: example.com | => smtp.example.com
+gitlab_rails['smtp_port'] = <SMTP_PORT>
+gitlab_rails['smtp_user_name'] = '<SMTP_USER>'
+gitlab_rails['smtp_password'] = '<SMTP_PASSWORD>'
+gitlab_rails['smtp_authentication'] = 'login'
+
+# The following depends on your SMTP server configuration
+# See: https://docs.gitlab.com/omnibus/settings/smtp.html
+gitlab_rails['smtp_enable_starttls_auto'] = true
+gitlab_rails['smtp_tls'] = false
+gitlab_rails['smtp_openssl_verify_mode'] = 'peer' # Can be: 'none', 'peer', 'client_once', 'fail_if_no_peer_cert'
+
+# Customize the notification e-mails
+gitlab_rails['gitlab_email_from'] = '<GITLAB_EMAIL_ADDRESS>'
+gitlab_rails['gitlab_email_name'] = '<GITLAB_EMAIL_NAME>'
+gitlab_rails['gitlab_email_reply_to'] = '<GITLAB_REPLY_TO_ADDRESS>'
+```
+
 Once you're done editing the file, reconfigure GitLab and reload the server. Your GitLab server should now be accessible through the external URL you configured, given that the DNS redirects to your Docker host.
 
 ```bash
